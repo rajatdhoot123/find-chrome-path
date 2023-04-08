@@ -127,7 +127,3 @@ export async function findBrowserPath() {
   }
   return output;
 }
-
-findBrowserPath().then((res) => {
-  console.log(res);
-});
