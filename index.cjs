@@ -2,85 +2,130 @@ const os = require("os");
 const fs = require("fs").promises;
 const path = require("path");
 
-async function findBrowserPath() {
-  const fs = require("fs");
-  const path = require("path");
+const getPath = async (browser) => {
+  let browserPath = "";
+  switch (os.platform()) {
+    case "win32":
+      {
+        // Windows
+        const prefixes = [
+          process.env.LOCALAPPDATA,
+          process.env.PROGRAMFILES,
+          process.env["PROGRAMFILES(X86)"],
+          process.env.APPDATA,
+        ];
 
-  // Get the home directory of the current user
-  const homedir = os.homedir();
-
-  // Define the browser names and their executables
-  const browsers = {
-    chrome: {
-      name: "Google Chrome",
-      linux: "google-chrome",
-      mac: "Google Chrome",
-      win: "Google\\Chrome\\Application\\chrome.exe",
-    },
-    brave: {
-      name: "Brave",
-      linux: "brave-browser",
-      mac: "Brave Browser",
-      win: "BraveSoftware\\Brave-Browser\\Application\\brave.exe",
-    },
-    firefox: {
-      name: "Firefox",
-      linux: "firefox",
-      mac: "Firefox",
-      win: "Mozilla Firefox\\firefox.exe",
-    },
-  };
-
-  // Find the browser path for the given operating system and browser name
-  function findBrowserPath(browserName) {
-    const browser = browsers[browserName];
-    if (!browser) {
-      console.error(`Unsupported browser: ${browserName}`);
-      return null;
-    }
-    const platform = os.platform();
-    let browserPath;
-    switch (platform) {
-      case "linux":
-        browserPath = path.join("/usr", "bin", browser.linux);
-        break;
-      case "darwin":
-        browserPath = path.join(
-          "/Applications",
-          `${browser.mac}.app`,
-          "Contents",
-          "MacOS",
-          `${browser.mac}`
-        );
-        break;
-      case "win32":
-        browserPath = path.join("C:", "Program Files (x86)", browser.win);
-        break;
-      default:
-        console.error(`Unsupported platform: ${platform}`);
-        return null;
-    }
-    if (!fs.existsSync(browserPath)) {
-      console.error(`Browser not found: ${browser.name} (${browserPath})`);
-      return null;
-    }
-    return browserPath;
-  }
-
-  // Find the paths of all supported browsers
-  const browserPaths = {};
-  for (const browserName in browsers) {
-    // eslint-disable-next-line no-prototype-builtins
-    if (browsers.hasOwnProperty(browserName)) {
-      const browserPath = findBrowserPath(browserName);
-      if (browserPath) {
-        browserPaths[browserName] = browserPath;
+        for (const prefix of prefixes) {
+          if (prefix) {
+            const pathToTry = path.join(
+              prefix,
+              browser,
+              "Application",
+              `${browser}.exe`
+            );
+            try {
+              await fs.access(pathToTry);
+              browserPath = pathToTry;
+              break;
+            } catch (error) {}
+          }
+        }
       }
-    }
-  }
+      break;
 
-  // Log the browser paths to the console
-  return browserPaths;
+    case "darwin":
+      {
+        // Mac
+        const pathsToTry = [
+          path.join(
+            "/Applications",
+            `${browser}.app`,
+            "Contents",
+            "MacOS",
+            browser
+          ),
+          path.join(
+            os.homedir(),
+            "Applications",
+            `${browser}.app`,
+            "Contents",
+            "MacOS",
+            browser
+          ),
+          path.join(
+            os.homedir(),
+            "Applications",
+            `${browser}.app`,
+            "Contents",
+            "MacOS",
+            `${browser}_bin`
+          ),
+        ];
+
+        for (const path of pathsToTry) {
+          try {
+            await fs.access(path);
+            browserPath = path;
+            break;
+          } catch (error) {}
+        }
+      }
+      break;
+
+    case "linux":
+      {
+        // Linux
+        const pathsToTry = [
+          path.join("/usr", "bin", browser),
+          path.join("/usr", "local", "bin", browser),
+          path.join(os.homedir(), ".local", "bin", browser),
+        ];
+
+        for (const path of pathsToTry) {
+          try {
+            await fs.access(path);
+            browserPath = path;
+            break;
+          } catch (error) {}
+        }
+      }
+      break;
+
+    default:
+      throw new Error(`Unsupported platform: ${os.platform()}`);
+  }
+  return browserPath;
+};
+
+async function findBrowserPath() {
+  let output = {};
+  const browserList = [
+    {
+      name: "chrome",
+      linux: "google-chrome",
+      darwin: "Google Chrome",
+      win32: "Google\\Chrome\\Application\\chrome.exe",
+    },
+    {
+      name: "brave",
+      linux: "brave-browser",
+      darwin: "Brave Browser",
+      win32: "BraveSoftware\\Brave-Browser\\Application\\brave.exe",
+    },
+    {
+      name: "firefox",
+      linux: "firefox",
+      darwin: "Firefox",
+      win32: "Mozilla Firefox\\firefox.exe",
+    },
+  ];
+
+  for (const [index, browser] of browserList.entries()) {
+    const name = browser[os.platform()];
+    const path = await getPath(name);
+    output[browser.name] = path;
+  }
+  return output;
 }
 
 module.exports = findBrowserPath;
