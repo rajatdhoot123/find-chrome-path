@@ -1,11 +1,12 @@
 {
   "name": "find-chrome-path",
-  "version": "1.0.4",
+  "version": "1.0.5",
   "description": "A package to find the path to the Chrome browser executable",
   "main": "index.js",
   "type": "module",
-  "bin": {
-    "find-chrome-path": "./index.js"
+  "exports": {
+    "import": "./index.js",
+    "require": "./index.cjs"
   },
   "keywords": [
     "chrome",

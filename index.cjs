@@ -2,7 +2,7 @@ const os = require("os");
 const fs = require("fs").promises;
 const path = require("path");
 
-export const findBrowserPath = async () => {
+async function findBrowserPath() {
   let browserPath = null;
   const browserList = ["chrome", "brave", "firefox", "edge"];
   let i = 0;
@@ -76,4 +76,6 @@ export const findBrowserPath = async () => {
   }
 
   return browserPath;
-};
+}
+
+module.exports = findBrowserPath;
