@@ -1,6 +1,6 @@
 {
   "name": "find-chrome-path",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "A package to find the path to the Chrome browser executable",
   "main": "index.js",
   "type": "module",
@@ -19,7 +19,5 @@
     "path"
   ],
   "license": "MIT",
-  "author": "Rajat Dhoot <rajatdhoot123@gmail.com>",
-  "dependencies": {},
-  "devDependencies": {}
+  "author": "Rajat Dhoot <rajatdhoot123@gmail.com>"
 }

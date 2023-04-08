@@ -1,70 +1,81 @@
 const os = require("os");
-const fs = require("fs");
+const fs = require("fs").promises;
+const path = require("path");
 
-function findChromePath() {
-  let chromePath = null;
+async function findBrowserPath() {
+  let browserPath = null;
+  const browserList = ["chrome", "brave", "firefox", "edge"];
+  let i = 0;
 
-  if (os.platform() === "win32") {
-    // Windows
-    const prefixes = [
-      process.env.LOCALAPPDATA,
-      process.env.PROGRAMFILES,
-      process.env["PROGRAMFILES(X86)"],
-      process.env.APPDATA,
-    ];
+  while (i < browserList.length && !browserPath) {
+    const browser = browserList[i];
+    i++;
 
-    for (const prefix of prefixes) {
-      if (prefix) {
+    switch (os.platform()) {
+      case "win32":
+        // Windows
+        const prefixes = [
+          process.env.LOCALAPPDATA,
+          process.env.PROGRAMFILES,
+          process.env["PROGRAMFILES(X86)"],
+          process.env.APPDATA,
+        ];
+
+        for (const prefix of prefixes) {
+          if (prefix) {
+            const pathToTry = path.join(
+              prefix,
+              browser,
+              "Application",
+              `${browser}.exe`
+            );
+            try {
+              await fs.access(pathToTry);
+              browserPath = pathToTry;
+              break;
+            } catch (error) {}
+          }
+        }
+        break;
+
+      case "darwin":
+        // Mac
+        const pathToTry = path.join(
+          "/Applications",
+          `${browser}.app`,
+          "Contents",
+          "MacOS",
+          browser
+        );
+        try {
+          await fs.access(pathToTry);
+          browserPath = pathToTry;
+        } catch (error) {}
+        break;
+
+      case "linux":
+        // Linux
         const pathsToTry = [
-          `${prefix}\\Google\\Chrome\\Application\\chrome.exe`,
-          `${prefix}\\Google\\Chrome SxS\\Application\\chrome.exe`,
+          path.join("/usr", "bin", browser),
+          path.join("/usr", "local", "bin", browser),
+          path.join(os.homedir(), ".local", "bin", browser),
         ];
 
         for (const path of pathsToTry) {
-          if (fs.existsSync(path)) {
-            chromePath = path;
+          try {
+            await fs.access(path);
+            browserPath = path;
             break;
-          }
+          } catch (error) {}
         }
-
-        if (chromePath) {
-          break;
-        }
-      }
-    }
-  } else if (os.platform() === "darwin") {
-    // Mac
-    const pathsToTry = [
-      "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome",
-      "/Applications/Google Chrome Canary.app/Contents/MacOS/Google Chrome Canary",
-      "/Applications/Chromium.app/Contents/MacOS/Chromium",
-    ];
-
-    for (const path of pathsToTry) {
-      if (fs.existsSync(path)) {
-        chromePath = path;
         break;
-      }
-    }
-  } else if (os.platform() === "linux") {
-    // Linux
-    const pathsToTry = [
-      "/usr/bin/google-chrome",
-      "/usr/bin/google-chrome-stable",
-      "/usr/bin/google-chrome-beta",
-      "/usr/bin/google-chrome-unstable",
-      "/usr/bin/chromium-browser",
-      "/usr/bin/chromium",
-      "/snap/bin/chromium",
-    ];
 
-    for (const path of pathsToTry) {
-      if (fs.existsSync(path)) {
-        chromePath = path;
-        break;
-      }
+      default:
+        throw new Error(`Unsupported platform: ${os.platform()}`);
     }
   }
 
-  return chromePath;
+  return browserPath;
 }
+
+module.exports = findBrowserPath;
