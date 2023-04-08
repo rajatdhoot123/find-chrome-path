@@ -26,10 +26,8 @@ const getPath = async (browser, win32) => {
             try {
               await fs.access(pathToTry);
               browserPath = pathToTry;
-              log.info(`Path to try ${pathToTry}`);
               break;
             } catch (error) {
-              log.info(`Path to error ${error}`);
             }
           }
         }
