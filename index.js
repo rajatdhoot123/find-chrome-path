@@ -26,8 +26,11 @@ const getPath = async (browser, win32) => {
             try {
               await fs.access(pathToTry);
               browserPath = pathToTry;
+              log.info(`Path to try ${pathToTry}`);
               break;
-            } catch (error) {}
+            } catch (error) {
+              log.info(`Path to error ${error}`);
+            }
           }
         }
       }
@@ -110,7 +113,7 @@ export async function findBrowserPath() {
       name: "brave",
       linux: "brave-browser",
       darwin: "Brave Browser",
-      win32: "Brave-Browser",
+      win32: "BraveSoftware\\Brave-Browser",
     },
     {
       name: "firefox",
