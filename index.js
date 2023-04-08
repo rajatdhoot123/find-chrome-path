@@ -104,19 +104,19 @@ export async function findBrowserPath() {
       name: "chrome",
       linux: "google-chrome",
       darwin: "Google Chrome",
-      win32: "Google\\Chrome\\Application\\chrome.exe",
+      win32: "Google\\Chrome\\Application\\chrome",
     },
     {
       name: "brave",
       linux: "brave-browser",
       darwin: "Brave Browser",
-      win32: "BraveSoftware\\Brave-Browser\\Application\\brave.exe",
+      win32: "BraveSoftware\\Brave-Browser\\Application\\brave",
     },
     {
       name: "firefox",
       linux: "firefox",
       darwin: "Firefox",
-      win32: "Mozilla Firefox\\firefox.exe",
+      win32: "Mozilla Firefox\\firefox",
     },
   ];
 
