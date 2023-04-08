@@ -2,7 +2,7 @@ import os from "os";
 import { promises as fs } from "fs";
 import path from "path";
 
-const getPath = async (browser) => {
+const getPath = async (browser, win32) => {
   let browserPath = "";
   switch (os.platform()) {
     case "win32":
@@ -21,7 +21,7 @@ const getPath = async (browser) => {
               prefix,
               browser,
               "Application",
-              `${browser}.exe`
+              `${win32}.exe`
             );
             try {
               await fs.access(pathToTry);
@@ -104,25 +104,25 @@ export async function findBrowserPath() {
       name: "chrome",
       linux: "google-chrome",
       darwin: "Google Chrome",
-      win32: "Google\\Chrome\\Application\\chrome",
+      win32: "Google\\Chrome",
     },
     {
       name: "brave",
       linux: "brave-browser",
       darwin: "Brave Browser",
-      win32: "BraveSoftware\\Brave-Browser\\Application\\brave",
+      win32: "Brave-Browser",
     },
     {
       name: "firefox",
       linux: "firefox",
       darwin: "Firefox",
-      win32: "Mozilla Firefox\\firefox",
+      win32: "Mozilla Firefox",
     },
   ];
 
   for (const [index, browser] of browserList.entries()) {
-    const name = browser[os.platform()];
-    const path = await getPath(name);
+    const platform = browser[os.platform()];
+    const path = await getPath(platform, browser.name);
     output[browser.name] = path;
   }
   return output;
