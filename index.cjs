@@ -97,7 +97,7 @@ const getPath = async (browser, win32) => {
   return browserPath;
 };
 
-export async function findBrowserPath() {
+async function findBrowserPath() {
   let output = {};
   const browserList = [
     {
