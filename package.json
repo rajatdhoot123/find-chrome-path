@@ -1,6 +1,6 @@
 {
   "name": "find-chrome-path",
-  "version": "1.0.14",
+  "version": "1.0.15",
   "description": "A package to find the path to the Chrome browser executable",
   "main": "index.js",
   "type": "module",
